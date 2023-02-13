@@ -17,3 +17,6 @@ def load_npc_animation(sprite, color, weapon, state):
     animation = image.Animation(frames)
 
     return animation
+
+def load_tileset(path):
+    return image.load(path)

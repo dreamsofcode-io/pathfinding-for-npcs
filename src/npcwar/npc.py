@@ -1,4 +1,5 @@
-from pyglet import math
+from pyglet import math as pmath
+import math
 from pyglet import shapes
 from pyglet import graphics
 from pyglet import sprite
@@ -20,21 +21,32 @@ class NPC:
 
         self._scale = scale * 0.25
         self._sprite.scale = self._scale
-        self._direction = 0
+        self.target = pmath.Vec2(0,0)
+        self.direction = 0
 
     @property
     def position(self):
-        return self.circle.position
+        return pmath.Vec2(self._sprite.x, self._sprite.y)
 
     @position.setter
-    def position(self, pos: math.Vec2):
+    def position(self, pos: pmath.Vec2):
         self._sprite.x = pos.x
         self._sprite.y = pos.y
 
-    def place_at(self, pos: math.Vec2):
+    @property
+    def direction(self):
+        return self._direction
+
+    @direction.setter
+    def direction(self, angle):
+        self._direction = angle
+        self._sprite.rotation = math.degrees(angle)
+
+    def place_at(self, pos: pmath.Vec2):
+        self._target = None
         self._direction = 0
         self.position = pos
-        self._velocity = math.Vec2(0,0)
+        self._velocity = pmath.Vec2(0,0)
         self.is_aiming = False
         self.cooldown_timer = 0
         self.respawn_timer = 0
@@ -43,5 +55,38 @@ class NPC:
         self.last_accuracy = 1
         self.health = 100
 
+    @property
+    def target(self):
+        return self._target
+
+    @target.setter
+    def target(self, pos: pmath.Vec2):
+        self._target = pos
+
     def update(self, dt):
-        pass
+        turn_speed = 5 * dt
+
+        if self._target is not None:
+            current_direction = self.direction
+
+            target_dir = math.atan2(self.position.y - self._target.y, self._target.x - self.position.x)
+            if target_dir != current_direction:
+                if target_dir > current_direction:
+                    if target_dir - current_direction > math.pi:
+                        self.direction -= turn_speed
+                    else:
+                        self.direction += turn_speed
+                else:
+                    if current_direction - target_dir > math.pi:
+                        self.direction += turn_speed
+                    else:
+                        self.direction -= turn_speed
+
+                if self.direction > math.pi:
+                    self.direction -= math.pi * 2
+                elif self.direction < -math.pi:
+                   self.direction += math.pi * 2
+
+
+                if math.fabs(self.direction - target_dir) < turn_speed:
+                    self.direction = target_dir
