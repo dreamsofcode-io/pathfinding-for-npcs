@@ -1,12 +1,13 @@
 import pyglet
 from pyglet import math
-from npcwar import map, npc, marker
+from npcwar import map, npc, marker, assets
 
 class Game:
     def __init__(self, width, height, scale):
         self.map = map.Map(width=width * scale, height=height * scale, scale=scale)
         self.batch = pyglet.graphics.Batch()
-        self.npc = npc.NPC(batch=self.batch, scale=scale)
+        self.assetmanager = assets.AssetManager()
+        self.npc = npc.NPC(batch=self.batch, scale=scale, assetmanager=self.assetmanager)
         self.npc.place_at(math.Vec2(width // 2, height // 2))
         self.marker = marker.Marker(batch=self.batch, scale=scale)
 

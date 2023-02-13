@@ -1,13 +1,25 @@
 from pyglet import math
 from pyglet import shapes
 from pyglet import graphics
+from pyglet import sprite
+from enum import Enum
+
+class NPCState(Enum):
+    IDLE = 0
+    MOVING = 1
 
 class NPC:
-    def __init__(self, batch, scale):
-        self.color = color=(255, 0, 0)
-        self._scale = scale
-        self._circle = shapes.Circle(x=0, y=0, radius=10 * scale, color=self.color, batch=batch)
-        self._line = shapes.Line(x=0, y=0, x2=0, y2=0, width=4 * scale, color=self.color, batch=batch)
+    def __init__(self, batch, scale, assetmanager):
+        self._color = 'green'
+
+        self._animations = {
+            NPCState.IDLE: assetmanager.get_animation('npc/green/rifle/idle'),
+        }
+
+        self._sprite = sprite.Sprite(self._animations[NPCState.IDLE], batch=batch)
+
+        self._scale = scale * 0.25
+        self._sprite.scale = self._scale
         self._direction = 0
 
     @property
@@ -16,11 +28,8 @@ class NPC:
 
     @position.setter
     def position(self, pos: math.Vec2):
-        self._circle.position = pos
-        self._line.position = pos
-        pointer = math.Vec2.from_polar(13 * self._scale, self._direction) + pos
-        self._line.x2 = pointer.x
-        self._line.y2 = pointer.y
+        self._sprite.x = pos.x
+        self._sprite.y = pos.y
 
     def place_at(self, pos: math.Vec2):
         self._direction = 0
