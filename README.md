@@ -25,3 +25,9 @@ Once you're in the virtual environment, you can install the dependencies
 ```
 $ pip install -r requirements.txt
 ```
+
+Then, you can run the code with
+
+```
+$ python src/main.py
+```

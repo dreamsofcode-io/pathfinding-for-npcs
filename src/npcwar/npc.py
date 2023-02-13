@@ -3,10 +3,11 @@ from pyglet import shapes
 from pyglet import graphics
 
 class NPC:
-    def __init__(self, batch):
+    def __init__(self, batch, scale):
         self.color = color=(255, 0, 0)
-        self._circle = shapes.Circle(x=0, y=0, radius=20, color=self.color, batch=batch)
-        self._line = shapes.Line(x=0, y=0, x2=0, y2=0, width=8, color=self.color, batch=batch)
+        self._scale = scale
+        self._circle = shapes.Circle(x=0, y=0, radius=10 * scale, color=self.color, batch=batch)
+        self._line = shapes.Line(x=0, y=0, x2=0, y2=0, width=4 * scale, color=self.color, batch=batch)
         self._direction = 0
 
     @property
@@ -17,7 +18,7 @@ class NPC:
     def position(self, pos: math.Vec2):
         self._circle.position = pos
         self._line.position = pos
-        pointer = math.Vec2.from_polar(26, self._direction) + pos
+        pointer = math.Vec2.from_polar(13 * self._scale, self._direction) + pos
         self._line.x2 = pointer.x
         self._line.y2 = pointer.y
 

@@ -1,11 +1,12 @@
 import pyglet
-from game import Game
+from npcwar.game import Game
 
-screenwidth = 2048
-screenheight = 1536
+scale = 1
+screenwidth = 1024
+screenheight = 768
 
-window = pyglet.window.Window(screenwidth, screenheight)
-game = Game(width=screenwidth, height=screenheight)
+window = pyglet.window.Window(screenwidth * scale, screenheight * scale, resizable=False)
+game = Game(width=screenwidth, height=screenheight, scale=scale)
 
 @window.event
 def on_draw():
