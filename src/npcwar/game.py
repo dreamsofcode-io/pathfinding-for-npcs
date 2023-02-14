@@ -31,4 +31,6 @@ class Game:
 
     def update(self, dt, args):
         self.npc.update(dt)
+        if self.npc.target is None:
+            self.marker.remove_marker()
 

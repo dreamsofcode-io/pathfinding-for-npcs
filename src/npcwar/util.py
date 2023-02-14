@@ -2,7 +2,7 @@ from pyglet import image
 from pyglet import graphics
 import os
 
-def load_npc_animation(sprite, color, weapon, state):
+def load_npc_animation(sprite, color, weapon, state, duration=0.1):
     directory = './assets/sprites/{}/{}/{}/{}'.format(sprite, color, weapon, state)
     files = os.listdir(directory)
 
@@ -12,7 +12,7 @@ def load_npc_animation(sprite, color, weapon, state):
         img = image.load('{}/{}'.format(directory, file))
         img.anchor_x = img.width // 2
         img.anchor_y = img.height // 2
-        frames.append(image.AnimationFrame(img, duration=0.1))
+        frames.append(image.AnimationFrame(img, duration=duration))
 
     animation = image.Animation(frames)
 

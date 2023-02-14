@@ -21,6 +21,7 @@ class NPC:
 
         self._sprite = sprite.Sprite(self._animations[NPCState.IDLE], batch=batch)
 
+        self._state = None
         self._scale = scale * 0.25
         self._sprite.scale = self._scale
         self.target = pmath.Vec2(0,0)
@@ -32,6 +33,8 @@ class NPC:
 
     @state.setter
     def state(self, state: NPCState):
+        if self._state == state:
+            return
         self._state = state
         self._sprite.image = self._animations[state]
 
@@ -86,29 +89,43 @@ class NPC:
         pass
         
     def turn_towards_target(self, dt):
+        # If we have no target, no need to turn
+        if self._target is None:
+            return
+        
+        # Calculate the angle to the target
+        target_dir = math.atan2(
+            self.position.y - self._target.y,
+            self._target.x - self.position.x,
+        )
+
+        # If we are already facing the target, no need to turn 
+        if target_dir == self.direction:
+            return
+
+        # Calculate the amount of degrees we can turn this frame
         turn_speed = 25 * dt
 
-        if self._target is not None:
-            current_direction = self.direction
+        # Turn towards the target
+        if target_dir > self.direction:
+            # If the target is on the other side of the circle, turn the other way
+            if target_dir - self.direction > math.pi:
+                self.direction -= turn_speed
+            else:
+                self.direction += turn_speed
+        else:
+            # If the target is on the other side of the circle, turn the other way
+            if self.direction - target_dir > math.pi:
+                self.direction += turn_speed
+            else:
+                self.direction -= turn_speed
 
-            target_dir = math.atan2(self.position.y - self._target.y, self._target.x - self.position.x)
-            if target_dir != current_direction:
-                if target_dir > current_direction:
-                    if target_dir - current_direction > math.pi:
-                        self.direction -= turn_speed
-                    else:
-                        self.direction += turn_speed
-                else:
-                    if current_direction - target_dir > math.pi:
-                        self.direction += turn_speed
-                    else:
-                        self.direction -= turn_speed
+        # Make sure we don't turn too far
+        if self.direction > math.pi:
+            self.direction -= math.pi * 2
+        elif self.direction < -math.pi:
+            self.direction += math.pi * 2
 
-                if self.direction > math.pi:
-                    self.direction -= math.pi * 2
-                elif self.direction < -math.pi:
-                   self.direction += math.pi * 2
-
-
-                if math.fabs(self.direction - target_dir) < turn_speed:
-                    self.direction = target_dir
+        # If we are close enough to the target, just face it to avoid jittering
+        if math.fabs(self.direction - target_dir) < turn_speed:
+            self.direction = target_dir
