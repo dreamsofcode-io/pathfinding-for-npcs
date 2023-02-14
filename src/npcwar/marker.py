@@ -10,7 +10,7 @@ class Marker:
         self._img.anchor_y = 5
         self._sprite = pyglet.sprite.Sprite(self._img, batch=batch)
         self._sprite.visible = False
-        self._sprite.scale = scale * 0.5
+        self._sprite.scale = scale * 0.1
 
     def place_at(self, pos: math.Vec2):
         self._sprite.visible = True

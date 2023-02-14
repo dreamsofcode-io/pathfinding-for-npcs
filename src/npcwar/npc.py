@@ -3,6 +3,7 @@ import math
 from pyglet import shapes
 from pyglet import graphics
 from pyglet import sprite
+import pyglet
 from enum import Enum
 
 class NPCState(Enum):
@@ -15,6 +16,7 @@ class NPC:
 
         self._animations = {
             NPCState.IDLE: assetmanager.get_animation('npc/green/rifle/idle'),
+            NPCState.MOVING: assetmanager.get_animation('npc/green/rifle/move'),
         }
 
         self._sprite = sprite.Sprite(self._animations[NPCState.IDLE], batch=batch)
@@ -23,6 +25,15 @@ class NPC:
         self._sprite.scale = self._scale
         self.target = pmath.Vec2(0,0)
         self.direction = 0
+
+    @property
+    def state(self):
+        return self._state
+
+    @state.setter
+    def state(self, state: NPCState):
+        self._state = state
+        self._sprite.image = self._animations[state]
 
     @property
     def position(self):
@@ -64,7 +75,7 @@ class NPC:
         self._target = pos
 
     def update(self, dt):
-        turn_speed = 5 * dt
+        turn_speed = 25 * dt
 
         if self._target is not None:
             current_direction = self.direction
