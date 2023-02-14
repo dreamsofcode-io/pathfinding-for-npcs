@@ -86,7 +86,37 @@ class NPC:
             self.state = NPCState.IDLE
 
     def move_towards_target(self, dt):
-        pass
+        # If target doesn't exist. Do nothing
+        if self.target is None:
+            return
+
+        # If we are already at the target, no need to move
+        if self.position == self.target:
+            self.target = None
+            return
+
+        # Calculate the velocity this frame
+        speed = 200 * dt
+
+        # Calculate the angle to the target
+        target_angle = math.atan2(
+            self.target.y - self.position.y, 
+            self.target.x - self.position.x
+        )
+
+        # Calculate the velocity vector
+        self._velocity.x = math.cos(target_angle) * speed
+        self._velocity.y = math.sin(target_angle) * speed
+
+        position = self.position + self._velocity
+
+        # If we are close enough to the target, snap to it
+        if math.fabs(position.x - self.target.x) < speed:
+            position.x = self.target.x
+        if math.fabs(position.y - self.target.y) < speed:
+            position.y = self.target.y
+
+        self.position = position
         
     def turn_towards_target(self, dt):
         # If we have no target, no need to turn
