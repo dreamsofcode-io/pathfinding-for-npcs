@@ -75,6 +75,17 @@ class NPC:
         self._target = pos
 
     def update(self, dt):
+        if self._target is not None:
+            self.state = NPCState.MOVING
+            self.turn_towards_target(dt)
+            self.move_towards_target(dt)
+        else:
+            self.state = NPCState.IDLE
+
+    def move_towards_target(self, dt):
+        pass
+        
+    def turn_towards_target(self, dt):
         turn_speed = 25 * dt
 
         if self._target is not None:
