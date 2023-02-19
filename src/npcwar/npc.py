@@ -11,8 +11,9 @@ class NPCState(Enum):
     MOVING = 1
 
 class NPC:
-    def __init__(self, batch, scale, assetmanager):
+    def __init__(self, batch, scale, map, assetmanager):
         self._color = 'green'
+        self._map = map
 
         self._animations = {
             NPCState.IDLE: assetmanager.get_animation('npc/green/rifle/idle'),
@@ -22,9 +23,9 @@ class NPC:
         self._sprite = sprite.Sprite(self._animations[NPCState.IDLE], batch=batch)
 
         self._state = None
-        self._scale = scale * 0.25
+        self._scale = scale * 0.4
         self._sprite.scale = self._scale
-        self.target = pmath.Vec2(0,0)
+        self.target = None
         self.direction = 0
 
     @property
@@ -48,6 +49,24 @@ class NPC:
         self._sprite.y = pos.y
 
     @property
+    def top_left(self):
+        return self.position - pmath.Vec2(
+            self._sprite.width * self._scale / 2, 
+            self._sprite.height * self._scale /2
+        )
+
+    @property
+    def bottom_right(self):
+        return self.position + pmath.Vec2(
+            self._sprite.width * self._scale / 2,
+            self._sprite.height * self._scale / 2
+        )
+
+    @property
+    def radius(self):
+        return max(self._sprite.width, self._sprite.height) * self._scale / 2
+
+    @property
     def direction(self):
         return self._direction
 
@@ -58,6 +77,7 @@ class NPC:
 
     def place_at(self, pos: pmath.Vec2):
         self._target = None
+        self._path = None
         self._direction = 0
         self.position = pos
         self._velocity = pmath.Vec2(0,0)
@@ -77,31 +97,75 @@ class NPC:
     def target(self, pos: pmath.Vec2):
         self._target = pos
 
-    def update(self, dt):
         if self._target is not None:
+            self._path = self._map.find_shortest_path(
+                self.position,
+                self._target,
+            )
+
+            first_idx = self.last_in_line_of_sight()
+            if first_idx is not None and first_idx > 0:
+                self._path = self._path[first_idx:]
+
+    def in_line_of_sight(self, pos: pmath.Vec2):
+        if pos is None:
+            return False
+        return self._map.is_lineofsight(self.position, pos, padding=self.radius)
+    
+    def target_in_line_of_sight(self):
+        return self.in_line_of_sight(self._target)
+
+    def last_in_line_of_sight(self):
+        if self._path is None:
+            return None
+
+        last_idx = None
+
+        for idx, pos in enumerate(self._path):
+            if self.in_line_of_sight(pos):
+                last_idx = idx
+
+        return last_idx
+    
+    def update(self, dt):
+        if self._path is not None:
             self.state = NPCState.MOVING
-            self.turn_towards_target(dt)
-            self.move_towards_target(dt)
+
+            # Face towards the next path point
+            self.turn_towards_target(dt, self._path[0])
+
+            # Move towards the next path point
+            if self.move_towards_target(dt, self._path[0]):
+                self._path.pop(0)
+            if len(self._path) == 0:
+                self._path = None
+
+        elif self.target_in_line_of_sight():
+            self.state = NPCState.MOVING
+
+            self.turn_towards_target(dt, self._target)
+            if self.move_towards_target(dt, self._target):
+                self._target = None 
+                self._path = None
         else:
             self.state = NPCState.IDLE
 
-    def move_towards_target(self, dt):
+    def move_towards_target(self, dt, target) -> bool:
         # If target doesn't exist. Do nothing
-        if self.target is None:
-            return
+        if target is None:
+            return True
 
         # If we are already at the target, no need to move
-        if self.position == self.target:
-            self.target = None
-            return
+        if self.position == target:
+            return True
 
         # Calculate the velocity this frame
-        speed = 200 * dt
+        speed = 250 * dt
 
         # Calculate the angle to the target
         target_angle = math.atan2(
-            self.target.y - self.position.y, 
-            self.target.x - self.position.x
+            target.y - self.position.y, 
+            target.x - self.position.x
         )
 
         # Calculate the velocity vector
@@ -111,22 +175,24 @@ class NPC:
         position = self.position + self._velocity
 
         # If we are close enough to the target, snap to it
-        if math.fabs(position.x - self.target.x) < speed:
-            position.x = self.target.x
-        if math.fabs(position.y - self.target.y) < speed:
-            position.y = self.target.y
+        if math.fabs(position.x - target.x) < speed:
+            position.x = target.x
+        if math.fabs(position.y - target.y) < speed:
+            position.y = target.y
 
         self.position = position
+
+        return False
         
-    def turn_towards_target(self, dt):
+    def turn_towards_target(self, dt, target):
         # If we have no target, no need to turn
-        if self._target is None:
+        if target is None:
             return
         
         # Calculate the angle to the target
         target_dir = math.atan2(
-            self.position.y - self._target.y,
-            self._target.x - self.position.x,
+            self.position.y - target.y,
+            target.x - self.position.x,
         )
 
         # If we are already facing the target, no need to turn 
@@ -134,7 +200,7 @@ class NPC:
             return
 
         # Calculate the amount of degrees we can turn this frame
-        turn_speed = 25 * dt
+        turn_speed = 18 * dt
 
         # Turn towards the target
         if target_dir > self.direction:

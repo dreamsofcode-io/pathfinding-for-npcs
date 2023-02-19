@@ -1,5 +1,7 @@
 from pyglet import image
 from pyglet import graphics
+from pyglet import math as pmath
+import math
 import os
 
 def load_npc_animation(sprite, color, weapon, state, duration=0.1):
@@ -20,3 +22,8 @@ def load_npc_animation(sprite, color, weapon, state, duration=0.1):
 
 def load_tileset(path):
     return image.load(path)
+
+def calculate_distance(pos1: pmath.Vec2, pos2: pmath.Vec2):
+    a = (pos1.x - pos2.x)
+    b = (pos1.y - pos2.y)
+    return math.sqrt(a**2 + b**2)

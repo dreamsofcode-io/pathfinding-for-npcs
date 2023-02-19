@@ -1,1 +1,2 @@
 pyglet==2.0.4
+shapely==2.0.1

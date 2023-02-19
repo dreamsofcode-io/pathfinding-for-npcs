@@ -1,9 +1,9 @@
 import pyglet
 from npcwar.game import Game
 
-scale = 4
-screenwidth = 1024 * 2
-screenheight = 768 * 2
+scale = 2
+screenwidth = 1024 * scale
+screenheight = 768 * scale
 
 window = pyglet.window.Window(screenwidth, screenheight, resizable=False)
 game = Game(width=screenwidth, height=screenheight, scale=scale)
