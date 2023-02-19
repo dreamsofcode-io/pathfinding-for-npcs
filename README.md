@@ -31,3 +31,9 @@ Then, you can run the code with
 ```
 $ python src/main.py
 ```
+
+## Configuration
+
+Most of the configuration is in the main.py file.  Here you can change
+the window size, the scale (for HiDPI) and whether or not to show the 
+graph on the map for the pathfinding.

@@ -3,13 +3,15 @@ from pyglet import math
 from npcwar import map, npc, marker, assets, rectangle, graph
 
 class Game:
-    def __init__(self, width, height, scale):
+    def __init__(self, width, height, scale, show_graph):
         self.assetmanager = assets.AssetManager()
         self.batch = pyglet.graphics.Batch()
 
         self._graph = graph.setup_graph(scale)
 
-        self.map = map.Map(width=width, height=height, scale=scale, graph=self._graph)
+        self.map = map.Map(
+            width=width, height=height, scale=scale, graph=self._graph, show_graph=show_graph,
+        )
         self.map.add_block(149, 540, 200, 90)
         self.map.add_block(348, 144, 90, 486)
         self.map.add_block(438, 372, 429, 90)
@@ -37,7 +39,6 @@ class Game:
 
     def on_mouse_release(self, x, y, button, modifiers):
         if button == pyglet.window.mouse.LEFT:
-            print(x // 2, y // 2)
             if self.marker.check_collision(math.Vec2(x, y)):
                 self.marker.remove_marker()
                 self.npc.target = None

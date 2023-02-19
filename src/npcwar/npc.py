@@ -22,6 +22,7 @@ class NPC:
 
         self._sprite = sprite.Sprite(self._animations[NPCState.IDLE], batch=batch)
 
+        self._base_scale = scale
         self._state = None
         self._scale = scale * 0.4
         self._sprite.scale = self._scale
@@ -160,7 +161,7 @@ class NPC:
             return True
 
         # Calculate the velocity this frame
-        speed = 250 * dt
+        speed = 125 * dt * self._base_scale
 
         # Calculate the angle to the target
         target_angle = math.atan2(

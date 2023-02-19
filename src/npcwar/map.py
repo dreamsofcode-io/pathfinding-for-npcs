@@ -5,8 +5,8 @@ import math
 from npcwar import rectangle, graph
 
 class Map:
-    def __init__(self, width, height, scale, graph):
-        self.show_nodes = False self._graph = graph
+    def __init__(self, width, height, scale, graph, show_graph):
+        self._graph = graph
         self.width = width
         self.height = height
         self.scale = scale
@@ -20,8 +20,8 @@ class Map:
         self._nodetext = []
         self._edges = []
         self._spawn_points = {}
-        if self.show_nodes:
-            self.add_nodes()
+        if show_graph:
+            self.add_graph()
 
     def is_lineofsight(self, a: pmath.Vec2, b: pmath.Vec2, padding: int = 0) -> bool:
         line = LineString([(a.x, a.y), (b.x, b.y)])
@@ -51,7 +51,7 @@ class Map:
 
         self._blocks.append(r)
 
-    def add_nodes(self):
+    def add_graph(self):
         for node in self._graph.nodes():
             self._nodes.append(pyglet.shapes.Circle(
                 node.x,
